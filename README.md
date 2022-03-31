@@ -22,3 +22,5 @@ Once you've installed all the prerequisites, you can clone the repo and run the 
 ```shell
 git clone https://github.com/bartolomej/PR22_BK_LG_NS
 ```
+
+Jupyter notebook source is located in `notebook.ipynb`.
