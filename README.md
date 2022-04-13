@@ -1,26 +1,55 @@
-# Startup analysis
+## Goals
+Our general goal is to analyze company success. We are interested in which, why, and how did some companies become successful.
+## 1. Data preparation
+Primariy we read all the data from csv files into pandas dataframes. Additionally we already do a small amount of preprocessing here, for example, taking out only the objects that are companies (inestead of people, products...). Snippet for objets:
 
-## Getting started
+    import pandas as pd
+    
+    get_objects():
+        return pd.read_csv("data/objects.csv", sep=",")
+    investments = get_investments()
+    companies = objects[objects["entity_type"] == "Company"]
 
-### 1. Install git-lfs
-To setup this project locally using Git, you will need to install a git extension called [`git-lfs`](https://github.com/git-lfs/git-lfs). This is due to the file size limit that can be tracked using Git, [imposed by Github](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github#about-size-limits-on-github).
+We also figure out how much of the data is missing:
+Total rows: 28716673
+Total attributes: 145
+Percentage of missing values: ~32%
 
-To install `git-lfs`, follow the installation instructions for your platform, [here](https://github.com/git-lfs/git-lfs/wiki/Installation).
+## 2. Basic information
+Distribution of startups by the state where they were founded:
 
-You can validate the installation with command: `git lfs --version `
+![Locations](/images/location_bar.png)
 
-### 2. Python and Jupyter
+Graph of companies created over time. We can see that there was an explosion of new companies created in just the last few years.
 
-To use notebooks in this repo, you will need to have Python and Jupyter installed on your system.
+![Companies_time](/images/companies_over_time.png)
 
-Installation instructions for Jupyter: https://docs.jupyter.org/en/latest/install.html
+It would be also interesting to see how was this growth connected to the amount of funding received from VCs.
 
-### 3. Clone the repo
+![Investment_time](/images/investment_over_time.png)
 
-Once you've installed all the prerequisites, you can clone the repo and run the project.
+### 3. Industry sectors
+Grouping together sectors/categories, we can see which of them have more companies, and also more total investments.
 
-```shell
-git clone https://github.com/bartolomej/PR22_BK_LG_NS
-```
+    count_by_category = objects.groupby("category_code").size().sort_values()
+    total_fundings = funding_rounds.groupby("object_id", as_index=False)["raised_amount"].sum().sort_values("raised_amount",
+                                                                                                            ascending=False)
+    total_fundings_per_category = total_fundings.merge(objects, left_on="object_id", right_on="id")[["category_code", "raised_amount"]].groupby("category_code").sum()["raised_amount"].sort_values()
+    total_fundings.merge(objects, left_on="object_id", right_on="id")[["category_code", "raised_amount"]].groupby(
+        "category_code").sum()["raised_amount"].sort_values()
 
-Jupyter notebook source is located in `notebook.ipynb`.
+![total_comp_investments](/images/total_comp_investments.png)
+
+We try to track the investments in different sectors by year, looking at the most invested industry per year:
+
+    total_fundings_by_year = funding_rounds.copy()
+    total_fundings_by_year = total_fundings_by_year.dropna(axis=0)
+    total_fundings_by_year["funded_at"] = total_fundings_by_year["funded_at"].apply(
+        lambda x: datetime.strptime(str(x), "%Y-%m-%d").year)
+    total_fundings_by_year = total_fundings_by_year.merge(objects, left_on="object_id", right_on="id")[
+        ["category_code", "raised_amount", "funded_at"]].dropna()
+    max_fundings_in_year = total_fundings_by_year.groupby(["funded_at", "category_code"]).sum("raised_amount")
+    max_fundings_in_year = max_fundings_in_year.reset_index().loc[
+        max_fundings_in_year.reset_index().groupby("funded_at")["raised_amount"].idxmax()]
+
+![Yearly_best](/images/yearly_best.png)
