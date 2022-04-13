@@ -2,7 +2,7 @@
 Our general goal is to analyze company success. We are interested in which, why, and how did some companies become successful.
 
 ### 1. Data preparation
-Primariy we read all the data from csv files into pandas dataframes. Additionally we already do a small amount of preprocessing here, for example, taking out only the objects that are companies (inestead of people, products...). Snippet for objets:
+Primariy we read all the data from csv files into pandas dataframes. Additionally we already do a small amount of preprocessing here, for example, taking out only the objects that are companies (instead of people, products...). Snippet for objects:
 
 ```python
 import pandas as pd
@@ -21,15 +21,15 @@ Percentage of missing values: ~32%
 ### 2. Basic information
 Distribution of startups by the state where they were founded:
 
-![Locations](/images/location_bar.png)
+![Locations](./images/location_bar.png)
 
 Graph of companies created over time. We can see that there was an explosion of new companies created in just the last few years.
 
-![Companies_time](/images/companies_over_time.png)
+![Companies_time](./images/companies_over_time.png)
 
 It would be also interesting to see how was this growth connected to the amount of funding received from VCs.
 
-![Investment_time](/images/investment_over_time.png)
+![Investment_time](./images/investment_over_time.png)
 
 ### 3. Industry sectors
 Grouping together sectors/categories, we can see which of them have more companies, and also more total investments.
@@ -42,7 +42,7 @@ Grouping together sectors/categories, we can see which of them have more compani
         "category_code").sum()["raised_amount"].sort_values()
 ```
 
-![total_comp_investments](/images/total_comp_investments.png)
+![total_comp_investments](./images/total_comp_investments.png)
 
 We try to track the investments in different sectors by year, looking at the most invested industry per year:
 
@@ -57,7 +57,7 @@ max_fundings_in_year = total_fundings_by_year.groupby(["funded_at", "category_co
 max_fundings_in_year = max_fundings_in_year.reset_index().loc[
     max_fundings_in_year.reset_index().groupby("funded_at")["raised_amount"].idxmax()]
 ```
-![Yearly_best](/images/yearly_best.png)
+![Yearly_best](./images/yearly_best.png)
 
 Since the sector is mostly unchanging, we instead try to find the top 5 sectors, with the gihhest average changes in the last few years.
 
@@ -77,13 +77,17 @@ for cat in pd.unique(companies["category_code"].dropna()):
     df = pd.DataFrame({"category_code":cat, "mean":pct}, index=[0])
     means = pd.concat([means, df])
 ```
-![top_5_yearly](/images/top_5_yearly.png)
+![top_5_yearly](./images/top_5_yearly.png)
+
+We also computed some statistic based on the status of companies (operational/non-operational/...) by industry sector.
+
+![Company Status](./images/company_status.png)
 
 ### 4. Companies
 
-Where did employees enquire their education ? Who employs
+Where did employees enquire their education ?
 
-![university_amounts](/images/university_amounts.png)
+![university_amounts](./images/university_amounts.png)
 
 Percentage of employees that didn't graduate: ~47%
 
