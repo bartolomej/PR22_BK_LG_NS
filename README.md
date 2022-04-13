@@ -1,13 +1,17 @@
 ## Goals
 Our general goal is to analyze company success. We are interested in which, why, and how did some companies become successful.
+
 ### 1. Data preparation
 Primariy we read all the data from csv files into pandas dataframes. Additionally we already do a small amount of preprocessing here, for example, taking out only the objects that are companies (inestead of people, products...). Snippet for objets:
 
-    import pandas as pd
-    get_objects():
-        return pd.read_csv("data/objects.csv", sep=",")
-    investments = get_investments()
-    companies = objects[objects["entity_type"] == "Company"]
+```python
+import pandas as pd
+    
+def get_objects():
+    return pd.read_csv("data/objects.csv", sep=",")
+investments = get_investments()
+companies = objects[objects["entity_type"] == "Company"]
+```
 
 We also figure out how much of the data is missing:
 Total rows: 28716673
@@ -30,31 +34,35 @@ It would be also interesting to see how was this growth connected to the amount 
 ### 3. Industry sectors
 Grouping together sectors/categories, we can see which of them have more companies, and also more total investments.
 
+```python
     count_by_category = objects.groupby("category_code").size().sort_values()
     total_fundings = funding_rounds.groupby("object_id", as_index=False)["raised_amount"].sum().sort_values("raised_amount", ascending=False)
     total_fundings_per_category = total_fundings.merge(objects, left_on="object_id", right_on="id")[["category_code", "raised_amount"]].groupby("category_code").sum()["raised_amount"].sort_values()
     total_fundings.merge(objects, left_on="object_id", right_on="id")[["category_code", "raised_amount"]].groupby(
         "category_code").sum()["raised_amount"].sort_values()
+```
 
 ![total_comp_investments](/images/total_comp_investments.png)
 
 We try to track the investments in different sectors by year, looking at the most invested industry per year:
 
-    total_fundings_by_year = funding_rounds.copy()
-    total_fundings_by_year = total_fundings_by_year.dropna(axis=0)
-    total_fundings_by_year["funded_at"] = total_fundings_by_year["funded_at"].apply(
-        lambda x: datetime.strptime(str(x), "%Y-%m-%d").year)
-    total_fundings_by_year = total_fundings_by_year.merge(objects, left_on="object_id", right_on="id")[
-        ["category_code", "raised_amount", "funded_at"]].dropna()
-    max_fundings_in_year = total_fundings_by_year.groupby(["funded_at", "category_code"]).sum("raised_amount")
-    max_fundings_in_year = max_fundings_in_year.reset_index().loc[
-        max_fundings_in_year.reset_index().groupby("funded_at")["raised_amount"].idxmax()]
-
+```python
+total_fundings_by_year = funding_rounds.copy()
+total_fundings_by_year = total_fundings_by_year.dropna(axis=0)
+total_fundings_by_year["funded_at"] = total_fundings_by_year["funded_at"].apply(
+    lambda x: datetime.strptime(str(x), "%Y-%m-%d").year)
+total_fundings_by_year = total_fundings_by_year.merge(objects, left_on="object_id", right_on="id")[
+    ["category_code", "raised_amount", "funded_at"]].dropna()
+max_fundings_in_year = total_fundings_by_year.groupby(["funded_at", "category_code"]).sum("raised_amount")
+max_fundings_in_year = max_fundings_in_year.reset_index().loc[
+    max_fundings_in_year.reset_index().groupby("funded_at")["raised_amount"].idxmax()]
+```
 ![Yearly_best](/images/yearly_best.png)
 
 Since the sector is mostly unchanging, we instead try to find the top 5 sectors, with the gihhest average changes in the last few years.
 
-    def get_category_yearly_investments(cat):
+```python
+def get_category_yearly_investments(cat):
     total_fundings_by_year = funding_rounds.copy()
     total_fundings_by_year = total_fundings_by_year.dropna(axis=0)
     total_fundings_by_year["funded_at"] = total_fundings_by_year["funded_at"].apply(lambda x:datetime.strptime(str(x), "%Y-%m-%d").year)
@@ -62,17 +70,18 @@ Since the sector is mostly unchanging, we instead try to find the top 5 sectors,
     grouped = total_fundings_by_year.groupby(["category_code", "funded_at"]).sum("raised_amount")
     grouped = grouped.reset_index()[grouped.reset_index()["category_code"] == cat]
     return grouped
-    means = pd.DataFrame(columns=["category_code", "mean"])
-    for cat in pd.unique(companies["category_code"].dropna()):
-        pct = get_category_yearly_investments(cat).iloc[-5:]["raised_amount"].mean()
-        df = pd.DataFrame({"category_code":cat, "mean":pct}, index=[0])
-        means = pd.concat([means, df])
 
+means = pd.DataFrame(columns=["category_code", "mean"])
+for cat in pd.unique(companies["category_code"].dropna()):
+    pct = get_category_yearly_investments(cat).iloc[-5:]["raised_amount"].mean()
+    df = pd.DataFrame({"category_code":cat, "mean":pct}, index=[0])
+    means = pd.concat([means, df])
+```
 ![top_5_yearly](/images/top_5_yearly.png)
 
 ### 4. Companies
 
-Where did employees enquire their education ?
+Where did employees enquire their education ? Who employs
 
 ![university_amounts](/images/university_amounts.png)
 
