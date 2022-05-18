@@ -6,7 +6,7 @@ Primariy we read all the data from csv files into pandas dataframes. Additionall
 
 ```python
 import pandas as pd
-    
+
 def get_objects():
     return pd.read_csv("data/objects.csv", sep=",")
 investments = get_investments()
@@ -41,10 +41,10 @@ Grouping together sectors/categories, we can see which of them have more compani
 
 ```python
     count_by_category = objects.groupby("category_code").size().sort_values()
-    total_fundings = funding_rounds.groupby("object_id", as_index=False)["raised_amount"].sum().sort_values("raised_amount", ascending=False)
-    total_fundings_per_category = total_fundings.merge(objects, left_on="object_id", right_on="id")[["category_code", "raised_amount"]].groupby("category_code").sum()["raised_amount"].sort_values()
-    total_fundings.merge(objects, left_on="object_id", right_on="id")[["category_code", "raised_amount"]].groupby(
-        "category_code").sum()["raised_amount"].sort_values()
+total_fundings = funding_rounds.groupby("object_id", as_index=False)["raised_amount"].sum().sort_values("raised_amount", ascending=False)
+total_fundings_per_category = total_fundings.merge(objects, left_on="object_id", right_on="id")[["category_code", "raised_amount"]].groupby("category_code").sum()["raised_amount"].sort_values()
+total_fundings.merge(objects, left_on="object_id", right_on="id")[["category_code", "raised_amount"]].groupby(
+    "category_code").sum()["raised_amount"].sort_values()
 ```
 
 ![total_comp_investments](./images/total_comp_investments.png)
@@ -108,6 +108,35 @@ Where did employees acquire their education ?
 
 Percentage of employees that didn't graduate: ~47%
 
-### Predictions?
+### Predictions
 
-We decided to try to predict which status the company has, but ran into issues, due to lack of good attributtes?
+Our initial goal was to build a ML model that would predict the success probability of a company given some relevant attributes.
+
+For our first attempt, we decided to build a classification tree, but didn't had much success, because the dummy classifier basically outperformed our classification tree.
+
+The issue was that the prevalent target class (operating) was a pretty unusefull one. It didn't tell much about the success or failure of the company, it just told us that the company did not fail.
+
+| status    | count  |
+|-----------|--------|
+| alpha     | 113    |
+| private   | 219    |
+| beta      | 780    |
+| ipo       | 1134   |
+| closed    | 2773   |
+| live      | 4349   |
+| acquired  | 9394   |
+| operating | 443663 |
+
+We decided to temporarily remove all rows that belong to that class and rather focus on other classes, which could be assigned a success/failure value more easily (ipo=success, closed=failure, failure~success,...), but our metric for success is still quite vague and subjective.
+
+We got some better results with this approach. Our dummy model had an accuracy of ~48% and our SVM classifier had 73% accuracy.
+We tried building different combinations of features, but haven't had much success with any particular one.
+
+Another idea was to use some dimensionality reduction methods to also get some visual (2d) insights into the data. Our hope was that we would see at least some degree of clustering, but that also wasn't the case.
+
+![](./images/dimen_reduction.png)
+
+#### Conclusion
+Based on our research, we believe that our current dataset doesn't contain the sorts of features that would be appropriate for this kind of prediction.
+
+We need to better define some company success/failure metrics and then try again. One idea is to mine financial data of public companies (those with status=ipo), which would provide us with better and more standardised metrics for evaluating company success.
