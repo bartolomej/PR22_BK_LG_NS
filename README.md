@@ -1,7 +1,7 @@
 ## Goals
-Our general goal is to analyze company success. We are interested in which, why, and how did some companies become successful.
+Our general goal is to analyze the startup world. We are interested in the general state of it, what industries are performing the best, which states look the most promising, and various other data. Additionally we also want to find some success qualifiers for the invvolved companies.
 
-### 1. Data preparation
+## 1. Data preparation
 Primariy we read all the data from csv files into pandas dataframes. Additionally we already do a small amount of preprocessing here, for example, taking out only the objects that are companies (instead of people, products...). Snippet for objects:
 
 ```python
@@ -18,10 +18,14 @@ Total rows: 28716673
 Total attributes: 145
 Percentage of missing values: ~32%
 
-### 2. Basic information
-Distribution of startups by the state where they were founded:
+32% seems like a lot, but it is scattered accross every attributte, and often doesn't signify that a value is missing, but that it doesn't exist (state_code, foor example, is missing in any row where the country isn't US).
 
-![Locations](./images/location_bar.png)
+It's important to note that we removed non US data when doing some of the below tasks. This is because the highest investitions are placed into US companies (and they also make up over 1/4 of  the data)
+
+## 2. Basic information
+Map of startup density by the US state. We can see that by far the most companies are founded in California:
+
+<img src="./images/companies_per_state.png" alt="drawing" width="700"/>
 
 Graph of companies created over time. We can see that there was an explosion of new companies created in just the last few years.
 
@@ -31,8 +35,9 @@ It would be also interesting to see how was this growth connected to the amount 
 
 ![Investment_time](./images/investment_over_time.png)
 
-### 3. Industry sectors
-Grouping together sectors/categories, we can see which of them have more companies, and also more total investments.
+As we can see, the startup world has constantly grow, especially in the last few years.
+## 3. Industry sectors
+Grouping together sectors/categories, we can see which of them have more companies, and also more total investments. We can see that most companies are in the tech sector, which makes sense, because it's a newere and boomin industry. The highest investments are made into biotech.
 
 ```python
     count_by_category = objects.groupby("category_code").size().sort_values()
@@ -44,7 +49,7 @@ Grouping together sectors/categories, we can see which of them have more compani
 
 ![total_comp_investments](./images/total_comp_investments.png)
 
-We try to track the investments in different sectors by year, looking at the most invested industry per year:
+We try to track the investments in different sectors by year, looking at the most invested industry per year.
 
 ```python
 total_fundings_by_year = funding_rounds.copy()
@@ -59,7 +64,7 @@ max_fundings_in_year = max_fundings_in_year.reset_index().loc[
 ```
 ![Yearly_best](./images/yearly_best.png)
 
-Since the sector is mostly unchanging, we instead try to find the top 5 sectors, with the gihhest average changes in the last few years.
+Since the sector is mostly unchanging, we instead try to find the top 5 sectors, with the highest average changes in the last few years. We once again see that biotech is at the top, and is also still rapidly growing. Behind it are once again other tech based startups (except for enterprise).
 
 ```python
 def get_category_yearly_investments(cat):
@@ -79,15 +84,30 @@ for cat in pd.unique(companies["category_code"].dropna()):
 ```
 ![top_5_yearly](./images/top_5_yearly.png)
 
-We also computed some statistic based on the status of companies (operational/non-operational/...) by industry sector.
+We also computed some statistic based on the status of companies (operational/non-operational/...) by industry sector. Most of the data includes companies that are still running, and is mostly uniform through the industries, though companies that produce semiconductors seem more likely to be bought.
 
-![Company Status](./images/company_status.png)
+![Company Status](./images/statuses.png)
 
-### 4. Companies
+## 4. States and their connection to categories.
 
-Where did employees enquire their education ?
+We mapped out which industry has the highest average investment in each state
 
-![university_amounts](./images/university_amounts.png)
+! Manka zemljevid
+
+We also created a quick function to check which states have the highest average investment some industry. Below is the example for web, in which we see investments are highest in Indiana.
+
+![Highest_web](./images/highest_avg_investment_web.png)
+
+### Based on the above two point, we conclude that biotech seems to be the most promising industry, but the recieved investments also depend on the state the company is in.
+
+## 5. Companies
+
+Where did employees acquire their education ?
+
+![university_amounts](./images/education.png)
 
 Percentage of employees that didn't graduate: ~47%
 
+### Predictions?
+
+We decided to try to predict which status the company has, but ran into issues, due to lack of good attributtes?
