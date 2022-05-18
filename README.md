@@ -92,7 +92,7 @@ We also computed some statistic based on the status of companies (operational/no
 
 We mapped out which industry has the highest average investment in each state
 
-! Manka zemljevid
+![industry_status](./images/industry_status.png)
 
 We also created a quick function to check which states have the highest average investment some industry. Below is the example for web, in which we see investments are highest in Indiana.
 
