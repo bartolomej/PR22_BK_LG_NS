@@ -1,4 +1,4 @@
-## Goals
+## Analysis of trends and company success in the startup world.
 Our general goal is to analyze the startup world. We are interested in the general state of it, what industries are performing the best, which states look the most promising, and various other data. Additionally we also want to find some success qualifiers for the invvolved companies.
 
 ## 1. Data preparation
